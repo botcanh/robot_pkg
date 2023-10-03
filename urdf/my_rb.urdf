@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<robot name="test_robot">
+
+  <link name="base_link">
+    <collision>
+      <geometry>
+        <box size="0.16 0.16 0.12"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.085"/>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </collision>
+
+    <visual>
+      <geometry>
+        <box size="0.16 0.16 0.12"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.085"/>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+
+  <inertial>
+      <mass value="1"/>
+      <inertia
+        ixx="0.003" ixy="0.0" ixz="0.0"
+        iyy="0.003" iyz="0.0"
+        izz="0.004"/>
+    </inertial>
+  </link>
+
+  <link name = "rwheel">
+    <visual>
+      <geometry>
+        <cylinder radius = "0.046" length = "0.008"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius = "0.046" length = "0.008"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material>Gazebo/Black</material>
+    </collision>
+
+  <inertial>
+    <mass value="1"/>
+     <inertia
+      ixx="0.0005" ixy="0.0" ixz="0.0"
+      iyy="0.0005" iyz="0.0"
+      izz="0.0002"/>
+  </inertial>
+  </link>
+
+  <joint name="base_to_rwheel" type="continuous">
+    <parent link="base_link"/>
+    <child link="rwheel"/>
+    <origin xyz="0 0.115 0.046" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name = "lwheel">
+    <visual>
+      <geometry>
+        <cylinder radius = "0.046" length = "0.008"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius = "0.046" length = "0.008"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material>Gazebo/Black </material>
+    </collision>
+
+  <inertial>
+    <mass value="1"/>
+     <inertia
+      ixx="0.0005" ixy="0.0" ixz="0.0"
+      iyy="0.0005" iyz="0.0"
+      izz="0.0002"/>
+  </inertial>
+
+  </link>
+
+  <joint name="base_to_lwheel" type="continuous">
+    <parent link="base_link"/>
+    <child link="lwheel"/>
+    <origin xyz="0 -0.115 0.046" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+<link name="fwheel">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <origin rpy="1.578 0 0" xyz="0 0 0"/>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name = "base to fwheel" type = "fixed">
+    <parent link="base_link"/>
+    <child link="fwheel"/>
+    <origin rpy="0 0 0" xyz="0.08 0 0.02"/>
+  </joint>
+
+<gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+      <controlPeriod>0.001</controlPeriod>
+      <legacyModeNS>false</legacyModeNS>
+    </plugin>
+  </gazebo>
+<!--######################################################################-->
+<gazebo>
+      <plugin name="diff_drive_controller" filename="libgazebo_ros_diff_drive.so">
+        <legacyMode>false</legacyMode>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>1000.0</updateRate>
+        <leftJoint>lwheel</leftJoint>
+        <rightJoint>rwheel</rightJoint>
+        <wheelSeparation>0.5</wheelSeparation>
+        <wheelDiameter>0.2</wheelDiameter>
+        <wheelTorque>10</wheelTorque>
+        <publishTf>1</publishTf>
+        <odometryFrame>map</odometryFrame>
+        <commandTopic>cmd_vel</commandTopic>
+        <odometryTopic>odom</odometryTopic>
+        <robotBaseFrame>base_link</robotBaseFrame>
+        <wheelAcceleration>2.8</wheelAcceleration>
+        <publishWheelJointState>true</publishWheelJointState>
+        <publishWheelTF>false</publishWheelTF>
+        <odometrySource>world</odometrySource>
+        <rosDebugLevel>Debug</rosDebugLevel>
+      </plugin>
+</gazebo>
+<!--######################################################################-->
+<gazebo reference="lwheel">
+ <mu1 value="1.0"/>
+ <mu2 value="1.0"/>
+ <kp value="10000000.0" />
+ <kd value="1.0" />
+ <fdir1 value="1 0 0"/>
+</gazebo>
+
+<gazebo reference="rwheel">
+ <mu1 value="1.0"/>
+ <mu2 value="1.0"/>
+ <kp value="10000000.0" />
+ <kd value="1.0" />
+ <fdir1 value="1 0 0"/>
+</gazebo>
+
+  <!-- TRANMISSION -->
+<transmission name="rwheel_transmission">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="base_to_rwheel">
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="rwheel_motor">
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    <mechanicalReduction>1.0</mechanicalReduction>
+  </actuator>
+</transmission>
+
+<transmission name="lwheel_transmission">
+  <type>transmission_interface/SimpleTransmission</type>
+  <joint name="base_to_lwheel">
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+  </joint>
+  <actuator name="lwheel_motor">
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    <mechanicalReduction>1.0</mechanicalReduction>
+  </actuator>
+</transmission>
+</robot>
